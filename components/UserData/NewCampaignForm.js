@@ -1,123 +1,152 @@
-import {  View,  Text,  StyleSheet,  Dimensions,  TextInput,  TouchableOpacity,ScrollView} from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+  ScrollView,
+  Image,
+  Alert,
+} from "react-native";
 import React from "react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { useNavigation } from "@react-navigation/native";
-const { height, width } = Dimensions.get("window");
 import { useForm, Controller } from "react-hook-form";
 import * as ImagePicker from "expo-image-picker";
+import { AntDesign } from "@expo/vector-icons";
+import * as yup from "yup";
+import { yupResolver } from "@hookform/resolvers/yup";
+
+import MyDatePicker from "../DatePicker";
+import CategoryPicker from "../category/CategoryPicker";
+import UserContext from "../context/userContext";
+import Loader from "../Loader";
+
 export default function SignUp() {
+  const { userdata, createCampaign, isLoading, setIsLoading } =
+    useContext(UserContext);
+
+  let startdate = new Date().toISOString().slice(0, 10);
+
   const navigation = useNavigation();
   const [image, setImage] = useState(null);
-  const [selected, setSelected] = React.useState("");
-  const [submittedDate, setSubmittedDate] = useState();
-  const [date, setDate] = useState(new Date(1598051730000));
+  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [category, setCategory] = useState("Art");
 
+  const placeHolder =
+    "http://res.cloudinary.com/dfmhxmauj/image/upload/v1670337910/axqfk5lkxf09qsbhpspr.jpg";
 
-  const [picture, setPicture] = useState(null);
+  const campaignValidationSchema = yup.object().shape({
+    title: yup
+      .string()
+      .required("Title is Required")
+      .min(3, "Title must be 3 characters"),
+    walletAddress: yup
+      .string()
+      .required("Wallet Address is mandatory")
+      .matches(/^0x[a-fA-F0-9]{40}$/g, "Please Provide a Valid Wallet Address"),
+    campaignGoal: yup
+      .number()
+      .min(1)
+      .typeError("Campaign Goal is mandatory. It must be a number")
+      .required("Campaign Goal is mandatory"),
+    description: yup.string().required("Description is mandatory"),
+  });
+
   const {
-    register,
-    setValue,
     handleSubmit,
     control,
-    reset,
     formState: { errors },
   } = useForm({
-    defaultValues: {
-      title: '',
-      EndDate: '',
-      WalletAddress: '',
-      Amount:'',
-      Description:''
-    }
+    mode: "onChange",
+    resolver: yupResolver(campaignValidationSchema),
   });
   const onSubmit = async (data) => {
-    console.log(data)
-  //   const fData = new FormData();
-  //   const ext = image?.split(".").pop();
-  //   const filename = `${data.name}.${ext}`;
-  //   const file = {
-  //     uri: image,
-  //     name: filename,
-  //     type: `image/${ext}`,
-  //   };
-  //   // console.log(data);
-  //   // console.log(date)
-  //   await handleUpload(file);
-  //   data.role = "user";
-  //   data.picture = picture;
-  //  // console.log("Data: ", data);
-  //   fData.append("Title", data.Title);
-  //   fData.append("EndDate", data.EndDate);
-  //   fData.append("WalletAddress", data.WalletAddress);
-  //   fData.append("Amount", data.Amount);
-  //   fData.append("Description", data.Description);
+    const fData = new FormData();
+    data.enddate = selectedDate;
+    data.category = category;
+    data.posterName = userdata.name;
+    data.posterPic = userdata.picture;
+    data.postedBy = userdata._id;
+    data.startdate = startdate;
+    data.permission = "pending";
+    fData.append("title", data.title);
+    fData.append("description", data.description);
+    fData.append("startdate", data.startdate);
+    fData.append("enddate", data.enddate);
+    fData.append("campaignGoal", data.campaignGoal);
+    fData.append("category", data.category);
+    fData.append("permission", data.permission);
+    fData.append("posterName", data.posterName);
+    fData.append("posterPic", data.posterPic);
+    fData.append("postedBy", data.postedBy);
+    fData.append("walletAddress", data.walletAddress);
 
-    
-  //   fData.append("picture", picture);
-  //   // fData.append("date", date);
+    const remaining = daysLeft(selectedDate);
 
-  //   console.log(fData);
-  //   fetch("http://10.135.49.31:3001/funderr/register", {
-  //     body: JSON.stringify(data),
-  //     headers: {
-  //       "Content-Type": "application/json",
-  //       //   // 'Content-Type': 'application/x-www-form-urlencoded',
-  //     },
-  //     method: "POST",
-  //   })
-  //     .then((res) => res.json())
-  //     .then((data) => {
-  //       console.log(data);
-  //     })
-  //     .catch((err) => {
-  //       console.log(err);
-  //     });
-  //   setTimeout(() => {
-  //     navigation.navigate("SignIn");
-  //   }, 1000);
+    if (remaining < 1) {
+      Alert.alert("Invalid End Date", "Please select a valid date");
+    } else if (!image) {
+      data.picture = placeHolder;
+      fData.append("picture", data.picture);
+      createCampaign(fData);
+    }
   };
 
-  // const handleUpload = async (image) => {
-  //   const data = new FormData();
-  //   data.append("file", image);
-  //   data.append("upload_preset", "funderrApp");
-  //   data.append("cloud_name", "dfmhxmauj");
-
-  //   await fetch("https://api.cloudinary.com/v1_1/dfmhxmauj/image/upload", {
-  //     method: "POST",
-  //     body: data,
-  //   })
-  //     .then((res) => res.json())
-  //     .then((data) => {
-  //       console.log("Picture: ", data.url);
-  //       setPicture(data.url);
-  //     })
-  //     .catch((err) => console.log(err));
-  // };
-
-
+  const daysLeft = (date) => {
+    const now = new Date();
+    const futureDate = new Date(date);
+    const timeDiff = futureDate.getTime() - now.getTime();
+    const diffDays = Math.ceil(timeDiff / (1000 * 3600 * 24));
+    return diffDays;
+  };
 
   const pickImage = async () => {
     // No permissions request is necessary for launching the image library
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.All,
-      allowsEditing: true,
+      allowsEditing: flase,
       aspect: [4, 3],
       quality: 1,
     });
 
-    //console.log("image",result);
-
-    if (!result.cancelled) {
-      setImage(result.uri);
+    if (!result.canceled) {
+      setImage(result.assets[0]);
     }
   };
 
+  let source;
+  if (!image) {
+    source = { uri: placeHolder };
+  } else {
+    source = image;
+  }
 
-  //console.log('errors', errors);
+  if (isLoading) {
+    return <Loader />;
+  }
+
   return (
-    <View style={styles.container}>
-   
+    <ScrollView style={styles.container}>
+      <View>
+        <AntDesign
+          style={styles.backicon}
+          name="arrowleft"
+          size={30}
+          color="#242F9B"
+          onPress={() => navigation.navigate("LandingPage")}
+        />
+        <Image
+          style={{
+            width: 300,
+            height: 250,
+
+            top: 7,
+            alignSelf: "center",
+          }}
+          source={require("../../assets/landingpage.png")}
+        />
+      </View>
       <Text
         style={{
           color: "#242F9B",
@@ -132,172 +161,176 @@ export default function SignUp() {
         control={control}
         render={({ field: { onChange, value } }) => (
           <TextInput
-            style={styles.email}
+            style={{
+              marginLeft: "10%",
+              borderWidth: 1,
+              borderColor: "#242F9B",
+              height: 40,
+              width: "75%",
+              marginTop: "2%",
+              borderRadius: 10,
+              padding: 10,
+            }}
             onChangeText={(value) => onChange(value)}
             value={value}
           />
         )}
-        name="Title"
-        rules={{ required: true }}
+        name="title"
       />
+      {errors.title && <Text style={styles.error}>{errors.title.message}</Text>}
+      <MyDatePicker setDate={setSelectedDate} />
       <Text
         style={{
           color: "#242F9B",
           fontSize: 18,
-          marginTop: "2%",
           marginLeft: "10%",
         }}
       >
-       EndDate
+        Wallet Address
       </Text>
       <Controller
         control={control}
         render={({ field: { onChange, value } }) => (
           <TextInput
-            style={styles.email}
+            style={{
+              marginLeft: "10%",
+              borderWidth: 1,
+              borderColor: "#242F9B",
+              height: 40,
+              width: "75%",
+              marginTop: "2%",
+              borderRadius: 10,
+              padding: 10,
+            }}
             onChangeText={(value) => onChange(value)}
             value={value}
           />
         )}
-        name="EndDate"
-        rules={{ required: true }}
+        name="walletAddress"
       />
-      
+      {errors.walletAddress && (
+        <Text style={styles.error}>{errors.walletAddress.message}</Text>
+      )}
       <Text
         style={{
           color: "#242F9B",
           fontSize: 18,
-          marginTop: "2%",
           marginLeft: "10%",
         }}
       >
-        WalletAddress
-      </Text>
-
-      <Controller
-        control={control}
-        render={({ field: { onChange, value } }) => (
-          <TextInput
-            style={styles.email}
-            onChangeText={(value) => onChange(value)}
-            value={value}
-          />
-        )}
-        name="WalletAddress"
-        rules={{ required: true }}
-      />
-        {/* <Text
-        style={{
-          color: "#242F9B",
-          fontWeight: "bold",
-          marginTop: 10,
-        }}
-      >
-        Category
-      </Text> */}
-      {/* <SelectList
-        setSelected={(val) => setSelected(val)}
-        data={data}
-        boxStyles={{
-          borderRadius: 30,
-          width: 300,
-          marginTop: 10,
-          borderColor: "#242F9B",
-        }}
-      /> */}
-
-      <Text
-        style={{
-          color: "#242F9B",
-          fontSize: 18,
-          marginTop: "2%",
-          marginLeft: "10%",
-        }}
-      >
-        Amount
+        Campaign Goal
       </Text>
       <Controller
         control={control}
         render={({ field: { onChange, value } }) => (
           <TextInput
-            style={styles.email}
+            style={{
+              marginLeft: "10%",
+              borderWidth: 1,
+              borderColor: "#242F9B",
+              height: 40,
+              width: "75%",
+              marginTop: "2%",
+              borderRadius: 10,
+              padding: 10,
+            }}
             onChangeText={(value) => onChange(value)}
             value={value}
-            numeric
-          keyboardType={'numeric'}
+            keyboardType={"numeric"}
           />
         )}
-        name="Amount"
-        rules={{ required: true , min: 1}}
+        name="campaignGoal"
       />
-      <Text style={styles.error}>{errors.Amount ? "Invalid Input! Value must be >= 1" : null}</Text>
+      {errors.campaignGoal && (
+        <Text style={styles.error}>{errors.campaignGoal.message}</Text>
+      )}
+      <CategoryPicker setCategory={setCategory} />
       <Text
         style={{
           color: "#242F9B",
           fontSize: 18,
-          marginTop: "2%",
           marginLeft: "10%",
         }}
       >
         Description
       </Text>
-
       <Controller
         control={control}
         render={({ field: { onChange, value } }) => (
           <TextInput
-            style={styles.email}
+            style={{
+              marginLeft: "10%",
+              borderWidth: 1,
+              borderColor: "#242F9B",
+              height: 140,
+              width: "75%",
+              marginTop: "2%",
+              borderRadius: 10,
+              padding: 10,
+              textAlignVertical: "top",
+            }}
             onChangeText={(value) => onChange(value)}
             value={value}
           />
         )}
-        name="Description"
-        rules={{ required: true }}
+        name="description"
       />
-
+      {errors.description && (
+        <Text style={styles.error}>{errors.description.message}</Text>
+      )}
+      <Image
+        source={source}
+        style={{
+          width: 100,
+          height: 100,
+          borderRadius: 50,
+          marginLeft: "10%",
+          marginTop: "2%",
+        }}
+      />
       <TouchableOpacity style={styles.imagebutton} onPress={pickImage}>
         <Text style={{ color: "#242F9B" }}>Upload Image</Text>
       </TouchableOpacity>
       <TouchableOpacity
-        style={styles.signupbuttoncontainer}
+        style={{
+          backgroundColor: "#242F9B",
+          height: 50,
+          borderRadius: 50,
+          width: "70%",
+          justifyContent: "center",
+          alignItems: "center",
+          marginLeft: "13%",
+          marginTop: "5%",
+          marginBottom: 30,
+        }}
         onPress={handleSubmit(onSubmit)}
       >
-        <Text style={styles.signupbutton}>Create Campaign</Text>
+        <Text
+          style={{
+            color: "white",
+            fontSize: 16,
+          }}
+        >
+          {isLoading ? "Please Wait...." : "Create Campaign"}
+        </Text>
       </TouchableOpacity>
-    </View>
+      {/* Add as many items as needed */}
+    </ScrollView>
   );
 }
 const styles = StyleSheet.create({
   container: {
-    width: width,
-    height: height,
+    flex: 1,
   },
-
   backicon: {
     marginTop: 40,
-    marginLeft: 10,
+    marginLeft: 15,
   },
-  email: {
-    marginLeft: "10%",
-    borderWidth: 1,
-    borderColor: "#242F9B",
-    height: 40,
-    width: "75%",
-    marginTop: "2%",
-    borderRadius: 10,
-  },
-  signupbuttoncontainer: {
-    backgroundColor: "#242F9B",
-    height: "7%",
-    borderRadius: 50,
-    width: "70%",
+  error: {
     justifyContent: "center",
     alignItems: "center",
     marginLeft: "13%",
-    marginTop: "5%",
-  },
-  signupbutton: {
-    color: "white",
+    color: "red",
   },
   imagebutton: {
     width: 130,
@@ -310,10 +343,4 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderColor: "#242F9B",
   },
-  error: {
-    justifyContent:"center",
-    alignItems:"center",
-    marginLeft: '13%',
-    color: 'red'
-  }
 });

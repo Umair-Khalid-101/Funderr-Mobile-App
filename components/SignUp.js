@@ -7,8 +7,9 @@ import {
   TouchableOpacity,
   ScrollView,
   Image,
+  Alert,
 } from "react-native";
-import React from "react";
+import React, { useContext } from "react";
 import { AntDesign } from "@expo/vector-icons";
 import { useState } from "react";
 import { useNavigation } from "@react-navigation/native";
@@ -17,9 +18,12 @@ import { useForm, Controller } from "react-hook-form";
 import * as ImagePicker from "expo-image-picker";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
-import * as FileSystem from "expo-file-system";
+
+import UserContext from "./context/userContext";
 
 export default function SignUp() {
+  const { registerUser, signUpSuccessfull } = useContext(UserContext);
+
   const placeHolder =
     "http://res.cloudinary.com/dfmhxmauj/image/upload/v1670337910/axqfk5lkxf09qsbhpspr.jpg";
 
@@ -44,7 +48,6 @@ export default function SignUp() {
 
   const navigation = useNavigation();
   const [image, setImage] = useState(null);
-  const [picture, setPicture] = useState(null);
   const {
     handleSubmit,
     control,
@@ -54,61 +57,37 @@ export default function SignUp() {
     resolver: yupResolver(signUpValidationSchema),
   });
   const onSubmit = async (data) => {
-    console.log(data);
-    // const fData = new FormData();
-    const ext = image?.uri.split(".").pop();
-    const filename = `${data.name}.${ext}`;
-    const file = {
-      uri: image,
-      name: filename,
-      type: `image/${ext}`,
-    };
-    await handleUpload(file);
-    // data.role = "user";
-    // data.picture = picture;
-    // // console.log("Data: ", data);
-    // // fData.append("name", data.name);
-    // // fData.append("email", data.email);
-    // // fData.append("password", data.password);
-    // // fData.append("role", "user");
-    // // fData.append("picture", picture);
-    // // console.log(fData);
-    // fetch("http://192.168.1.135:3001/funderr/register", {
-    //   body: JSON.stringify(data),
-    //   headers: {
-    //     "Content-Type": "application/json",
-    //     //   // 'Content-Type': 'application/x-www-form-urlencoded',
-    //   },
-    //   method: "POST",
-    // })
-    //   .then((res) => res.json())
-    //   .then((data) => {
-    //     console.log(data);
-    //   })
-    //   .catch((err) => {
-    //     console.log(err);
-    //   });
-    // setTimeout(() => {
-    //   navigation.navigate("SignIn");
-    // }, 1000);
-  };
-
-  const handleUpload = async (image) => {
-    // const data = new FormData();
-    // data.append("file", image);
-    // data.append("upload_preset", "funderrApp");
-    // data.append("cloud_name", "dfmhxmauj");
-
-    await fetch("https://api.cloudinary.com/v1_1/dfmhxmauj/image/upload", {
-      method: "post",
-      body: data,
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        console.log("Picture: ", data.url);
-        setPicture(data.url);
-      })
-      .catch((err) => console.log(err));
+    if (image) {
+      const fData = new FormData();
+      const ext = image?.uri.split(".").pop();
+      const filename = `${data.name}.${ext}`;
+      fData.append("name", data.name);
+      fData.append("email", data.email);
+      fData.append("password", data.password);
+      fData.append("role", "user");
+      fData.append("file", {
+        uri: image.uri, // the file URI
+        name: filename, // the file name
+        type: `image/${ext}`, // the file type
+      });
+      registerUser(fData);
+    } else {
+      const fData = new FormData();
+      fData.append("name", data.name);
+      fData.append("email", data.email);
+      fData.append("password", data.password);
+      fData.append("role", "user");
+      fData.append("picture", placeHolder);
+      registerUser(fData);
+    }
+    if (signUpSuccessfull) {
+      Alert.alert("SignUp", "Signed Up Successfully!");
+      setTimeout(() => {
+        navigation.navigate("SignIn");
+      }, 1000);
+    } else {
+      Alert.alert("SignIn", "User Already Registered!");
+    }
   };
 
   const pickImage = async () => {

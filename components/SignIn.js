@@ -6,6 +6,7 @@ import {
   TextInput,
   TouchableOpacity,
   ScrollView,
+  Alert,
 } from "react-native";
 import { AntDesign } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
@@ -17,7 +18,7 @@ import UserContext from "./context/userContext";
 
 export default function SignIn() {
   const navigation = useNavigation();
-  const { login } = useContext(UserContext);
+  const { login, loginSuccessfull } = useContext(UserContext);
 
   const loginValidationSchema = yup.object().shape({
     email: yup
@@ -66,9 +67,14 @@ export default function SignIn() {
           onSubmit={async (values) => {
             console.log(values);
             login(values);
-            setTimeout(() => {
-              navigation.navigate("LandingPage");
-            }, 3000);
+            if (loginSuccessfull) {
+              Alert.alert("LogIn", "Logged In Successfully!");
+              setTimeout(() => {
+                navigation.navigate("LandingPage");
+              }, 1000);
+            } else {
+              Alert.alert("LogIn", "Wrong Email or Password!");
+            }
           }}
         >
           {({
@@ -196,6 +202,7 @@ const styles = StyleSheet.create({
     marginTop: "2%",
     borderRadius: 10,
     color: "black",
+    padding: 10,
   },
   signupbuttoncontainer: {
     backgroundColor: "#242F9B",

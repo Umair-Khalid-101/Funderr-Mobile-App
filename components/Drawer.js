@@ -62,6 +62,12 @@ export default function Drawer() {
       >
         <Text style={styles.Mycampaignstext}>My Campaigns</Text>
       </TouchableOpacity>
+      <TouchableOpacity
+        style={styles.Mycampaignscontainer}
+        onPress={() => navigation.navigate("MyCampaigns")}
+      >
+        <Text style={styles.Mycampaignstext}>My Fav Campaigns</Text>
+      </TouchableOpacity>
 
       <TouchableOpacity
         style={styles.Mycampaignscontainer2}

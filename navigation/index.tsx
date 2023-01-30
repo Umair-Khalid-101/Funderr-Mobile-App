@@ -31,11 +31,7 @@ import SignUp from "../components/SignUp";
 import { UserProvider } from "../components/context/userContext";
 import LandingPage from "../components/LandingPage";
 import Drawer from "../components/Drawer";
-import Tech from "../components/category/Tech";
-import Medical from "../components/category/Medical";
-import Art from "../components/category/Art";
-import Music from "../components/category/Music";
-import Illustration from "../components/category/Illustration";
+import CategoryCampaigns from "../components/category/Tech";
 import Profile from "../components/Profile";
 import MyCampaigns from "../components/UserData/MyCampaigns";
 import HowItWorks from "../components/UserData/HowItWorks";
@@ -103,27 +99,7 @@ function RootNavigator() {
       />
       <Stack.Screen
         name="Tech"
-        component={Tech}
-        options={{ headerShown: false }}
-      />
-      <Stack.Screen
-        name="Medical"
-        component={Medical}
-        options={{ headerShown: false }}
-      />
-      <Stack.Screen
-        name="Art"
-        component={Art}
-        options={{ headerShown: false }}
-      />
-      <Stack.Screen
-        name="Music"
-        component={Music}
-        options={{ headerShown: false }}
-      />
-      <Stack.Screen
-        name="Illustration"
-        component={Illustration}
+        component={CategoryCampaigns}
         options={{ headerShown: false }}
       />
       <Stack.Screen
