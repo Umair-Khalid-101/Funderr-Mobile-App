@@ -16,6 +16,7 @@ import Loader from "./Loader";
 import { BaseUrl } from "./constants/index";
 import UserContext from "./context/userContext";
 import HorizontalScrollView from "./HorizontalScrollView";
+import { colors } from "./constants/index";
 
 export default function LandingPage() {
   const { verifiedCampaigns, setVerifiedCampaigns, token } =
@@ -89,7 +90,7 @@ export default function LandingPage() {
   ];
 
   if (isLoading) {
-    return <Loader />;
+    return <Loader title="Loading Featured Campaigns" />;
   }
 
   return (
@@ -126,6 +127,7 @@ export default function LandingPage() {
           size={28}
           color="white"
           style={{ alignSelf: "flex-end", marginRight: "5%", bottom: 30 }}
+          onPress={() => navigation.navigate("Notifications")}
         />
       </View>
 
@@ -139,7 +141,7 @@ export default function LandingPage() {
       >
         <Text
           style={{
-            color: "#242F9B",
+            color: colors.primary,
             fontSize: 16,
             marginRight: 10,
             marginTop: 10,
@@ -149,7 +151,7 @@ export default function LandingPage() {
         </Text>
         <TouchableOpacity
           style={{
-            backgroundColor: "#242F9B",
+            backgroundColor: colors.primary,
             width: 56,
             height: 56,
             borderRadius: 28,
@@ -173,7 +175,7 @@ export default function LandingPage() {
       >
         <Text
           style={{
-            color: "#242F9B",
+            color: colors.primary,
             fontWeight: "bold",
             fontSize: 20,
             marginBottom: 10,
@@ -187,7 +189,7 @@ export default function LandingPage() {
         <View style={{ marginLeft: 15 }}>
           <Text
             style={{
-              color: "#242F9B",
+              color: colors.primary,
               fontWeight: "bold",
               fontSize: 20,
               marginBottom: 5,
@@ -220,7 +222,7 @@ export default function LandingPage() {
 }
 const styles = StyleSheet.create({
   Navbar: {
-    backgroundColor: "#242F9B",
+    backgroundColor: colors.primary,
     height: 130,
     width: "100%",
     borderBottomLeftRadius: 30,
@@ -241,7 +243,7 @@ const styles = StyleSheet.create({
     position: "absolute",
   },
   categorybuttons: {
-    backgroundColor: "#242F9B",
+    backgroundColor: colors.primary,
     height: 40,
     borderRadius: 50,
     width: 80,
@@ -250,7 +252,7 @@ const styles = StyleSheet.create({
     marginTop: 15,
   },
   categorybuttons2: {
-    backgroundColor: "#242F9B",
+    backgroundColor: colors.primary,
     height: 40,
     borderRadius: 50,
     width: 80,

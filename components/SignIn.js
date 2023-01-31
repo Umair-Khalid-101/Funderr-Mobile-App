@@ -6,7 +6,6 @@ import {
   TextInput,
   TouchableOpacity,
   ScrollView,
-  Alert,
 } from "react-native";
 import { AntDesign } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
@@ -15,10 +14,11 @@ import * as yup from "yup";
 import { Formik } from "formik";
 
 import UserContext from "./context/userContext";
+import { colors } from "./constants";
 
 export default function SignIn() {
   const navigation = useNavigation();
-  const { login, loginSuccessfull } = useContext(UserContext);
+  const { login } = useContext(UserContext);
 
   const loginValidationSchema = yup.object().shape({
     email: yup
@@ -38,12 +38,12 @@ export default function SignIn() {
           style={styles.backicon}
           name="arrowleft"
           size={28}
-          color="#242F9B"
+          color={colors.primary}
           onPress={() => navigation.navigate("MainPage")}
         />
         <Text
           style={{
-            color: "#242F9B",
+            color: colors.primary,
             fontSize: 40,
             fontWeight: "bold",
             marginLeft: "10%",
@@ -53,7 +53,7 @@ export default function SignIn() {
         </Text>
         <Text
           style={{
-            color: "#242F9B",
+            color: colors.primary,
             fontSize: 20,
             fontWeight: "bold",
             marginLeft: "10%",
@@ -65,16 +65,8 @@ export default function SignIn() {
           validationSchema={loginValidationSchema}
           initialValues={{ email: "", password: "" }}
           onSubmit={async (values) => {
-            console.log(values);
+            // console.log(values);
             login(values);
-            if (loginSuccessfull) {
-              Alert.alert("LogIn", "Logged In Successfully!");
-              setTimeout(() => {
-                navigation.navigate("LandingPage");
-              }, 1000);
-            } else {
-              Alert.alert("LogIn", "Wrong Email or Password!");
-            }
           }}
         >
           {({
@@ -88,7 +80,7 @@ export default function SignIn() {
             <>
               <Text
                 style={{
-                  color: "#242F9B",
+                  color: colors.primary,
                   fontSize: 18,
                   marginTop: "10%",
                   marginLeft: "10%",
@@ -109,7 +101,7 @@ export default function SignIn() {
               )}
               <Text
                 style={{
-                  color: "#242F9B",
+                  color: colors.primary,
                   fontSize: 18,
                   marginTop: "5%",
                   marginLeft: "10%",
@@ -139,7 +131,7 @@ export default function SignIn() {
         </Formik>
         {/* <Text
         style={{
-          color: "#242F9B",
+          color: colors.primary,
           fontWeight: "bold",
           fontSize: 15,
           margin: "10%",
@@ -154,11 +146,11 @@ export default function SignIn() {
           width: "10%",
         }}
       >
-        <AntDesign name="google" size={35} color="#242F9B" />
+        <AntDesign name="google" size={35} color=colors.primary />
       </TouchableOpacity>
       <Text
         style={{
-          color: "#242F9B",
+          color: colors.primary,
           fontWeight: "bold",
           fontSize: 15,
           marginLeft: "10%",
@@ -175,7 +167,7 @@ export default function SignIn() {
           width: "10%",
         }}
       >
-        <AntDesign name="facebook-square" size={35} color="#242F9B" />
+        <AntDesign name="facebook-square" size={35} color=colors.primary />
       </TouchableOpacity> */}
       </View>
     </ScrollView>
@@ -196,7 +188,7 @@ const styles = StyleSheet.create({
   email: {
     marginLeft: "10%",
     borderWidth: 1,
-    borderColor: "#242F9B",
+    borderColor: colors.primary,
     height: 40,
     width: "75%",
     marginTop: "2%",
@@ -205,7 +197,7 @@ const styles = StyleSheet.create({
     padding: 10,
   },
   signupbuttoncontainer: {
-    backgroundColor: "#242F9B",
+    backgroundColor: colors.primary,
     height: 50,
     borderRadius: 50,
     width: "70%",

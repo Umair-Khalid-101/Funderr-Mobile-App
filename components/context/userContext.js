@@ -1,7 +1,7 @@
+import { useNavigation } from "@react-navigation/native";
 import React from "react";
 import { createContext, useState } from "react";
 import { Alert } from "react-native";
-import { useNavigation } from "@react-navigation/native";
 
 const UserContext = createContext(null);
 
@@ -9,17 +9,17 @@ const BaseUrl = "http://192.168.43.154:3001/funderr";
 let Usertoken;
 
 export function UserProvider({ children }) {
-  // NAVIGATOR
+  //NAVIGATOR
   const navigation = useNavigation();
 
   // STATES
   const [token, setToken] = useState(null);
   const [userdata, setUserData] = useState(null);
-  const [signUpSuccessfull, setsignUpSuccessfull] = useState(true);
-  const [loginSuccessfull, setLoginSuccessfull] = useState(true);
   const [verifiedCampaigns, setVerifiedCampaigns] = useState();
   const [categoryCampaigns, setCategoryCampaigns] = useState();
-  const [isLoading, setIsLoading] = useState(true);
+  const [myCampaigns, setMyCampaigns] = useState();
+  const [myFavCampaigns, setMyFavCampaigns] = useState();
+  const [isLoading, setIsLoading] = useState(false);
 
   // FUNCTIONS
 
@@ -54,11 +54,21 @@ export function UserProvider({ children }) {
         // console.log(data);
         const newUser = data;
         setUserData(newUser);
-        setLoginSuccessfull(true);
+        Alert.alert("Success!", "Logged In Successfully", [
+          {
+            text: "Ok",
+            onPress: () => navigation.navigate("LandingPage"),
+          },
+        ]);
       })
       .catch((error) => {
         console.log(error);
-        setLoginSuccessfull(false);
+        Alert.alert("Failed!", "Wrong Email or Password", [
+          {
+            text: "Ok",
+            onPress: () => {},
+          },
+        ]);
       });
   };
 
@@ -74,16 +84,27 @@ export function UserProvider({ children }) {
       .then((res) => res.json())
       .then((data) => {
         // console.log(data);
-        setsignUpSuccessfull(true);
+        Alert.alert("Success!", "Signed Up Successfully", [
+          {
+            text: "Ok",
+            onPress: () => navigation.navigate("SignIn"),
+          },
+        ]);
       })
       .catch((err) => {
         console.log(err);
-        setsignUpSuccessfull(false);
+        Alert.alert("Failed!", "User Already Exists!", [
+          {
+            text: "Ok",
+            onPress: () => {},
+          },
+        ]);
       });
   };
 
   // 3- CREATE CAMPAIGN
   const createCampaign = async (data) => {
+    setIsLoading(true);
     await fetch(`${BaseUrl}/createcampaign`, {
       body: data,
       headers: {
@@ -93,8 +114,102 @@ export function UserProvider({ children }) {
     })
       .then((res) => res.json())
       .then((data) => {
+        // console.log(data);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+
+  // 4- EDIT/UPDATE CAMPAIGN
+  const editCampaign = async (data, id) => {
+    await fetch(`${BaseUrl}/editcampaign/${id}`, {
+      body: data,
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+      method: "PUT",
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        // console.log(data);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+
+  // 5- EDIT/UPDATE PROFILE
+  const editProfile = async (data, id) => {
+    await fetch(`${BaseUrl}/updatemobileprofile/${id}`, {
+      body: data,
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+      method: "PATCH",
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        // console.log(data);
+        setUserData(data);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+
+  // 6- PUSH NOTIFICATION(CAMPAIGN CREATION)
+  const sendNotification = async (data, id) => {
+    let message = `You created a new campaign: ${data.title}`;
+    let status = "unread";
+    let user = id;
+    const notification = {
+      message,
+      status,
+      user,
+    };
+    await fetch(`${BaseUrl}/pushNotification`, {
+      body: JSON.stringify(notification),
+      headers: {
+        "Content-Type": "application/json",
+      },
+      method: "POST",
+    })
+      .then((res) => res.json())
+      .then((data) => {
         console.log(data);
-        setIsLoading(false);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+
+  // 7- MARK NOTIFICATIONS AS READ
+  const markAsRead = async (id) => {
+    await fetch(`${BaseUrl}/markasread/${id}`, {
+      method: "PATCH",
+    })
+      .then((res) => res.text())
+      .then((data) => {
+        console.log(data);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+
+  // 8- ADD DONATIONS
+  const addDonation = async (data) => {
+    await fetch(`${BaseUrl}/adddonation`, {
+      body: JSON.stringify(data),
+      headers: {
+        "Content-Type": "application/json",
+      },
+      method: "POST",
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        console.log(data);
       })
       .catch((error) => {
         console.log(error);
@@ -110,8 +225,6 @@ export function UserProvider({ children }) {
         setUserData,
         login,
         registerUser,
-        signUpSuccessfull,
-        loginSuccessfull,
         verifiedCampaigns,
         setVerifiedCampaigns,
         categoryCampaigns,
@@ -119,6 +232,15 @@ export function UserProvider({ children }) {
         createCampaign,
         isLoading,
         setIsLoading,
+        myCampaigns,
+        setMyCampaigns,
+        editCampaign,
+        myFavCampaigns,
+        setMyFavCampaigns,
+        editProfile,
+        sendNotification,
+        markAsRead,
+        addDonation,
       }}
     >
       {children}

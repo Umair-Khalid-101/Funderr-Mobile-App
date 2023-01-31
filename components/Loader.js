@@ -2,7 +2,9 @@ import { StyleSheet, Text, View } from "react-native";
 import React, { useRef } from "react";
 import LottieView from "lottie-react-native";
 
-export default function Loader() {
+import { colors } from "./constants";
+
+export default function Loader({ title }) {
   const animation = useRef(null);
 
   return (
@@ -24,7 +26,7 @@ export default function Loader() {
             color: "white",
           }}
         >
-          Loading Data.
+          {title}
         </Text>
         <Text
           style={{
@@ -44,6 +46,6 @@ const styles = StyleSheet.create({
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "black",
+    backgroundColor: colors.primary,
   },
 });

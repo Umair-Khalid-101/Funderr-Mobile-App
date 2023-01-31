@@ -10,8 +10,11 @@ import React from "react";
 import { AntDesign } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { useContext } from "react";
+
+import { colors } from "./constants";
 import UserContext from "./context/userContext";
 const { height, width } = Dimensions.get("window");
+
 export default function Drawer() {
   const { userdata } = useContext(UserContext);
   const navigation = useNavigation();
@@ -24,7 +27,7 @@ export default function Drawer() {
           style={styles.backicon}
           name="arrowleft"
           size={28}
-          color="#242F9B"
+          color={colors.primary}
           onPress={() => navigation.navigate("LandingPage")}
         />
       </View>
@@ -36,7 +39,7 @@ export default function Drawer() {
           marginTop: 5,
           alignSelf: "center",
           borderRadius: 75,
-          borderColor: "#242F9B",
+          borderColor: colors.primary,
           borderWidth: 2,
         }}
         source={{ uri: imageUrl }}
@@ -45,7 +48,7 @@ export default function Drawer() {
         <Text
           style={{
             alignSelf: "center",
-            color: "#242F9B",
+            color: colors.primary,
             fontSize: 25,
             fontWeight: "bold",
             marginTop: 20,
@@ -63,8 +66,8 @@ export default function Drawer() {
         <Text style={styles.Mycampaignstext}>My Campaigns</Text>
       </TouchableOpacity>
       <TouchableOpacity
-        style={styles.Mycampaignscontainer}
-        onPress={() => navigation.navigate("MyCampaigns")}
+        style={styles.Mycampaignscontainer2}
+        onPress={() => navigation.navigate("MyFavCampaigns")}
       >
         <Text style={styles.Mycampaignstext}>My Fav Campaigns</Text>
       </TouchableOpacity>
@@ -97,7 +100,7 @@ const styles = StyleSheet.create({
     marginTop: 30,
   },
   Mycampaignscontainer: {
-    backgroundColor: "#242F9B",
+    backgroundColor: colors.primary,
     height: "7%",
     borderRadius: 50,
     width: "50%",
@@ -110,7 +113,7 @@ const styles = StyleSheet.create({
     color: "white",
   },
   Mycampaignscontainer2: {
-    backgroundColor: "#242F9B",
+    backgroundColor: colors.primary,
     height: "7%",
     borderRadius: 50,
     width: "50%",

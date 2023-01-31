@@ -23,16 +23,17 @@ import UserContext from "../context/userContext";
 import Loader from "../Loader";
 import { colors } from "../constants";
 
-export default function NewCampaignForm() {
-  const { userdata, createCampaign, isLoading, sendNotification } =
-    useContext(UserContext);
-
+export default function EditCampaignForm({ route }) {
+  const { userdata, editCampaign } = useContext(UserContext);
+  const { campaign } = route.params;
+  console.log("EditCampaign:", campaign);
   let startdate = new Date().toISOString().slice(0, 10);
 
   const navigation = useNavigation();
   const [image, setImage] = useState(null);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [category, setCategory] = useState("Art");
+  const [isLoading, setIsLoading] = useState(false);
 
   const placeHolder =
     "http://res.cloudinary.com/dfmhxmauj/image/upload/v1670337910/axqfk5lkxf09qsbhpspr.jpg";
@@ -59,6 +60,7 @@ export default function NewCampaignForm() {
     control,
     formState: { errors },
   } = useForm({
+    defaultValues: campaign,
     mode: "onChange",
     resolver: yupResolver(campaignValidationSchema),
   });
@@ -90,9 +92,10 @@ export default function NewCampaignForm() {
     } else if (!image) {
       data.picture = placeHolder;
       fData.append("picture", data.picture);
-      await sendNotification(data, userdata._id);
-      await createCampaign(fData);
-      navigation.navigate("LandingPage");
+      setIsLoading(true);
+      await editCampaign(fData, campaign._id);
+      setIsLoading(false);
+      navigation.navigate("Drawer");
     } else if (image) {
       const ext = image?.uri.split(".").pop();
       const filename = `${data.name}.${ext}`;
@@ -101,9 +104,10 @@ export default function NewCampaignForm() {
         name: filename, // the file name
         type: `image/${ext}`, // the file type
       });
-      await sendNotification(data, userdata._id);
-      await createCampaign(fData);
-      navigation.navigate("LandingPage");
+      setIsLoading(true);
+      await editCampaign(fData, campaign._id);
+      setIsLoading(false);
+      navigation.navigate("Drawer");
     }
   };
 
@@ -131,7 +135,7 @@ export default function NewCampaignForm() {
 
   let source;
   if (!image) {
-    source = { uri: placeHolder };
+    source = { uri: campaign.picture };
   } else {
     source = image;
   }
@@ -147,7 +151,7 @@ export default function NewCampaignForm() {
                 name="arrowleft"
                 size={30}
                 color={colors.primary}
-                onPress={() => navigation.navigate("LandingPage")}
+                onPress={() => navigation.navigate("MyCampaigns")}
               />
               <Image
                 style={{
@@ -326,13 +330,13 @@ export default function NewCampaignForm() {
                   fontSize: 16,
                 }}
               >
-                {isLoading ? "Please Wait...." : "Create Campaign"}
+                {isLoading ? "Please Wait...." : "Edit Campaign"}
               </Text>
             </TouchableOpacity>
           </ScrollView>
         </>
       )}
-      {isLoading && <Loader title="Creating Campaign..." />}
+      {isLoading && <Loader title="Updating Campaign..." />}
     </>
   );
 }

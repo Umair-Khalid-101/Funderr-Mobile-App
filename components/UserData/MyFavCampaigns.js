@@ -10,14 +10,14 @@ import Loader from "../Loader";
 import UserContext from "../context/userContext";
 import { BaseUrl } from "../constants";
 
-export default function MyCampaigns() {
-  const { token, myCampaigns, setMyCampaigns } = useContext(UserContext);
+export default function MyFavCampaigns() {
+  const { token, myFavCampaigns, setMyFavCampaigns } = useContext(UserContext);
   const navigation = useNavigation();
   const [isLoading, setisLoading] = useState(true);
 
   useEffect(() => {
     setisLoading(true);
-    fetch(`${BaseUrl}/userposts`, {
+    fetch(`${BaseUrl}/userfavposts`, {
       headers: {
         "x-auth-token": token,
       },
@@ -25,8 +25,8 @@ export default function MyCampaigns() {
       .then((res) => res.json())
       .then((data) => {
         // console.log(data.userposts);
-        let myCampaigns = data.userposts;
-        setMyCampaigns(myCampaigns);
+        let myCampaigns = data.userFavPosts;
+        setMyFavCampaigns(myCampaigns);
         setisLoading(false);
       })
       .catch((error) => {
@@ -34,25 +34,30 @@ export default function MyCampaigns() {
       });
   }, []);
 
-  // DELETE CAMPAIGN
-  const handleDelete = async (id, title) => {
-    fetch(`${BaseUrl}/deletepost/${id}`, {
+  // REMOVE FROM FAVORITES
+  const handleUnFav = async (id, title) => {
+    // console.log(`${BaseUrl}/deletefromfav/${id}`);
+    fetch(`${BaseUrl}/deletefromfav/${id}`, {
       method: "DELETE",
     })
+      .then((res) => res.json())
+      .then((data) => {
+        // console.log(data);
+      })
       .then(() => {
-        Alert.alert("DELETED", `${title} Deleted`);
+        Alert.alert("REMOVED", `${title} Removed from Favorites`);
       })
       .catch((error) => {
         console.log(error);
       });
-    let filteredCampaigns = myCampaigns.filter((item) => item._id !== id);
+    let filteredCampaigns = myFavCampaigns.filter((item) => item._id !== id);
     // console.log("FILTERED: ", filteredCampaigns);
-    setMyCampaigns(filteredCampaigns);
+    setMyFavCampaigns(filteredCampaigns);
   };
 
   return (
     <>
-      {isLoading && <Loader title="Loading My Campaigns" />}
+      {isLoading && <Loader title="Loading Fav Campaigns" />}
       {!isLoading && (
         <SafeAreaView>
           <ScrollView>
@@ -81,12 +86,12 @@ export default function MyCampaigns() {
                   alignSelf: "flex-start",
                   marginLeft: 30,
                   fontSize: 20,
-                  color: colors.primary,
+                  color: "#242F9B",
                 }}
               >
-                My Campaigns: ({myCampaigns.length})
+                Favorite Campaigns: ({myFavCampaigns.length})
               </Text>
-              {myCampaigns.map((campaign) => (
+              {myFavCampaigns.map((campaign) => (
                 <View key={Math.random()}>
                   <Card
                     title={campaign.title}
@@ -99,9 +104,9 @@ export default function MyCampaigns() {
                     startdate={campaign.startdate}
                     campaign={campaign}
                     permission={campaign.permission}
-                    type="MyCampaigns"
+                    type="FavCampaigns"
                     handlePress={() =>
-                      handleDelete(campaign._id, campaign.title)
+                      handleUnFav(campaign._id, campaign.title)
                     }
                   />
                 </View>

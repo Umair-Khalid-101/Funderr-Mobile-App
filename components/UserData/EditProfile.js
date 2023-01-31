@@ -18,37 +18,25 @@ import * as ImagePicker from "expo-image-picker";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 
-import UserContext from "./context/userContext";
-import { colors } from "./constants";
+import UserContext from "../context/userContext";
+import { colors } from "../constants";
 const { height, width } = Dimensions.get("window");
-import Loader from "./Loader";
+import Loader from "../Loader";
 
-export default function SignUp() {
-  const { registerUser } = useContext(UserContext);
+export default function EditProfile() {
+  const { userdata, editProfile } = useContext(UserContext);
   const [isLoading, setIsLoading] = useState(false);
-
-  const placeHolder =
-    "http://res.cloudinary.com/dfmhxmauj/image/upload/v1670337910/axqfk5lkxf09qsbhpspr.jpg";
-
+  const placeHolder = userdata.picture;
   const signUpValidationSchema = yup.object().shape({
     email: yup
       .string()
       .email("Please enter valid email")
       .required("Email Address is Required"),
-    password: yup
-      .string()
-      .min(8, ({ min }) => `Password must be at least ${min} characters`)
-      .required("Password is required"),
-    confirmpassword: yup
-      .string()
-      .required("Confrim Password is required")
-      .oneOf([yup.ref("password")], "Passwords does not match"),
     name: yup
       .string()
       .required("Name is Required")
       .min(3, "Name must be 3 characters"),
   });
-
   const navigation = useNavigation();
   const [image, setImage] = useState(null);
   const {
@@ -56,6 +44,7 @@ export default function SignUp() {
     control,
     formState: { errors },
   } = useForm({
+    defaultValues: userdata,
     mode: "onChange",
     resolver: yupResolver(signUpValidationSchema),
   });
@@ -74,8 +63,9 @@ export default function SignUp() {
         type: `image/${ext}`, // the file type
       });
       setIsLoading(true);
-      await registerUser(fData);
+      await editProfile(fData, userdata._id);
       setIsLoading(false);
+      navigation.navigate("Profile");
     } else {
       const fData = new FormData();
       fData.append("name", data.name);
@@ -84,8 +74,9 @@ export default function SignUp() {
       fData.append("role", "user");
       fData.append("picture", placeHolder);
       setIsLoading(true);
-      await registerUser(fData);
+      await editProfile(fData, userdata._id);
       setIsLoading(false);
+      navigation.navigate("Profile");
     }
   };
 
@@ -124,27 +115,6 @@ export default function SignUp() {
               color={colors.primary}
               onPress={() => navigation.navigate("MainPage")}
             />
-            <Text
-              style={{
-                color: colors.primary,
-                fontSize: 40,
-                fontWeight: "bold",
-                marginLeft: "10%",
-                marginTop: 10,
-              }}
-            >
-              Funderr
-            </Text>
-            <Text
-              style={{
-                color: colors.primary,
-                fontSize: 20,
-                fontWeight: "bold",
-                marginLeft: "10%",
-              }}
-            >
-              Sign Up to Funderr
-            </Text>
             <Text
               style={{
                 color: colors.primary,
@@ -193,59 +163,6 @@ export default function SignUp() {
             {errors.email && (
               <Text style={styles.errors}>{errors.email.message}</Text>
             )}
-            <Text
-              style={{
-                color: colors.primary,
-                fontSize: 18,
-                marginTop: "2%",
-                marginLeft: "10%",
-              }}
-            >
-              Password
-            </Text>
-
-            <Controller
-              control={control}
-              render={({ field: { onChange, value } }) => (
-                <TextInput
-                  style={styles.email}
-                  onChangeText={(value) => onChange(value)}
-                  value={value}
-                  secureTextEntry
-                />
-              )}
-              name="password"
-            />
-            {errors.password && (
-              <Text style={styles.errors}>{errors.password.message}</Text>
-            )}
-            <Text
-              style={{
-                color: colors.primary,
-                fontSize: 18,
-                marginTop: "2%",
-                marginLeft: "10%",
-              }}
-            >
-              Confirm Password
-            </Text>
-            <Controller
-              control={control}
-              render={({ field: { onChange, value } }) => (
-                <TextInput
-                  style={styles.email}
-                  onChangeText={(value) => onChange(value)}
-                  value={value}
-                  secureTextEntry
-                />
-              )}
-              name="confirmpassword"
-            />
-            {errors.confirmpassword && (
-              <Text style={styles.errors}>
-                {errors.confirmpassword.message}
-              </Text>
-            )}
             <Image
               source={source}
               style={{
@@ -263,53 +180,12 @@ export default function SignUp() {
               style={styles.signupbuttoncontainer}
               onPress={handleSubmit(onSubmit)}
             >
-              <Text style={styles.signupbutton}>Sign Up</Text>
+              <Text style={styles.signupbutton}>Save Changes</Text>
             </TouchableOpacity>
-            {/* <Text
-          style={{
-            color: colors.primary,
-            fontWeight: "bold",
-            fontSize: 15,
-            margin: "10%",
-          }}
-        >
-          Or Sign Up with{" "}
-        </Text>
-        <TouchableOpacity
-          style={{
-            marginLeft: "37%",
-            bottom: 75,
-
-            width: "10%",
-          }}
-        >
-          <AntDesign name="google" size={35} color=colors.primary />
-        </TouchableOpacity>
-        <Text
-          style={{
-            color: colors.primary,
-            fontWeight: "bold",
-            fontSize: 15,
-            marginLeft: "10%",
-            bottom: "7%",
-          }}
-        >
-          Or Sign Up with{" "}
-        </Text>
-        <TouchableOpacity
-          style={{
-            marginLeft: "37%",
-            bottom: 80,
-
-            width: "10%",
-          }}
-        >
-          <AntDesign name="facebook-square" size={35} color=colors.primary />
-        </TouchableOpacity> */}
           </View>
         </ScrollView>
       )}
-      {isLoading && <Loader title="Signing Up..." />}
+      {isLoading && <Loader title="Updating Profile..." />}
     </>
   );
 }

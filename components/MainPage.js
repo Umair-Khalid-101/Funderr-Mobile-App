@@ -1,16 +1,15 @@
 import { useNavigation } from "@react-navigation/native";
-import { StatusBar } from "expo-status-bar";
 import {
   StyleSheet,
   Text,
   View,
   Dimensions,
-  Button,
   Image,
   TouchableOpacity,
 } from "react-native";
 
 const { height, width } = Dimensions.get("window");
+import { colors } from "./constants";
 
 export default function MainPage() {
   const navigation = useNavigation();
@@ -58,7 +57,7 @@ export default function MainPage() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#242F9B",
+    backgroundColor: colors.primary,
     alignItems: "center",
     justifyContent: "center",
     marginTop: "8%",
@@ -81,10 +80,10 @@ const styles = StyleSheet.create({
     right: 60,
   },
   loginbutton: {
-    color: "#242F9B",
+    color: colors.primary,
   },
   signupbuttoncontainer: {
-    backgroundColor: "#242F9B",
+    backgroundColor: colors.primary,
     borderRadius: 10,
     borderWidth: 1,
     borderColor: "white",

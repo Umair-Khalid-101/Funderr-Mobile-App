@@ -1,9 +1,14 @@
-import React from "react";
-import { StyleSheet, TouchableOpacity, TextInput } from "react-native";
+import React, { useState } from "react";
+import { StyleSheet, TouchableOpacity, TextInput, Alert } from "react-native";
 import { Text, View } from "../components/Themed";
 import { useWalletConnect } from "@walletconnect/react-native-dapp";
 import { useForm, Controller } from "react-hook-form";
 import { useNavigation } from "@react-navigation/native";
+import * as yup from "yup";
+import { yupResolver } from "@hookform/resolvers/yup";
+import BouncyCheckbox from "react-native-bouncy-checkbox";
+
+import { colors } from "../components/constants";
 
 const shortenAddress = (address) => {
   return `${address.slice(0, 6)}...${address.slice(
@@ -15,23 +20,46 @@ const shortenAddress = (address) => {
 export default function TabOneScreen({ route, navigation }) {
   const navigate = useNavigation();
   const { campaign } = route.params;
+  const [checkboxState, setCheckboxState] = React.useState(false);
+
   // console.log("Campaign:(DonateForm)", campaign);
+
+  const donationValidationSchema = yup.object().shape({
+    walletAddress: yup
+      .string()
+      .required("Wallet Address is mandatory")
+      .matches(/^0x[a-fA-F0-9]{40}$/g, "Please Provide a Valid Wallet Address"),
+    amount: yup
+      .string()
+      .required("Amount is mandatory")
+      .matches(
+        /^(?!0+(?:\.0+)?$)\d+(?:\.\d+)?$/,
+        "Please provide a Valid Amount"
+      ),
+  });
+
   const {
-    register,
-    setValue,
     handleSubmit,
     control,
-    reset,
     formState: { errors },
   } = useForm({
     defaultValues: {
       walletAddress: campaign.walletAddress,
-      amount: "",
+      amount: "0.001",
     },
+    mode: "onChange",
+    resolver: yupResolver(donationValidationSchema),
   });
   const onSubmit = async (data) => {
-    console.log(data);
-    await Donate(data);
+    if (checkboxState) {
+      console.log(data);
+      await Donate(data);
+    } else {
+      Alert.alert(
+        "Terms&Conditions!",
+        "Please Read and agree to the terms and conditions to proceed with the Donation!"
+      );
+    }
   };
 
   const connector = useWalletConnect();
@@ -86,7 +114,7 @@ export default function TabOneScreen({ route, navigation }) {
           <View>
             <Text
               style={{
-                color: "#242F9B",
+                color: colors.primary,
                 fontSize: 18,
                 marginTop: 10,
               }}
@@ -105,9 +133,12 @@ export default function TabOneScreen({ route, navigation }) {
               name="walletAddress"
               rules={{ required: true }}
             />
+            {errors.walletAddress && (
+              <Text style={styles.error}>{errors.walletAddress.message}</Text>
+            )}
             <Text
               style={{
-                color: "#242F9B",
+                color: colors.primary,
                 fontSize: 18,
                 marginTop: 5,
               }}
@@ -127,10 +158,52 @@ export default function TabOneScreen({ route, navigation }) {
               name="amount"
               rules={{ required: true }}
             />
+            {errors.amount && (
+              <Text style={styles.error}>{errors.amount.message}</Text>
+            )}
+            <BouncyCheckbox
+              size={30}
+              fillColor={colors.primary}
+              innerIconStyle={{ borderColor: colors.primary }}
+              style={{ marginTop: 16 }}
+              isChecked={checkboxState}
+              text="Terms and Conditions"
+              disableBuiltInState
+              onPress={() => setCheckboxState(!checkboxState)}
+            />
+            <Text
+              style={{
+                fontSize: 16,
+                fontWeight: "bold",
+                width: 300,
+                marginTop: 10,
+                color: colors.primary,
+              }}
+              numberOfLines={5}
+            >
+              Terms & Conditions state that the user agrees to donate the
+              desired amount to the other person which cannot be returned back.
+              It is the basic policy of website. Also, the amount shared on
+              wrong address cannot be returned. Kindly make sure the given
+              detail is correct.
+            </Text>
           </View>
           <TouchableOpacity
             onPress={handleSubmit(onSubmit)}
-            style={styles.buttonStyle}
+            style={{
+              backgroundColor: colors.primary,
+              borderWidth: 0,
+              color: "#FFFFFF",
+              borderColor: colors.primary,
+              height: 40,
+              width: 200,
+              alignItems: "center",
+              borderRadius: 30,
+              marginLeft: 35,
+              marginRight: 35,
+              marginTop: 30,
+              marginBottom: 20,
+            }}
           >
             <Text style={styles.buttonTextStyle}>Donate</Text>
           </TouchableOpacity>
@@ -147,29 +220,26 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   title: {
-    fontSize: 20,
+    fontSize: 24,
     fontWeight: "bold",
-  },
-  separator: {
-    marginVertical: 30,
-    height: 1,
-    width: "80%",
+    color: colors.primary,
   },
   buttonStyle: {
-    backgroundColor: "#3399FF",
+    backgroundColor: colors.primary,
     borderWidth: 0,
     color: "#FFFFFF",
-    borderColor: "#3399FF",
+    borderColor: colors.primary,
     height: 40,
+    width: 200,
     alignItems: "center",
     borderRadius: 30,
     marginLeft: 35,
     marginRight: 35,
-    marginTop: 20,
+    marginTop: 10,
     marginBottom: 20,
   },
   buttonTextStyle: {
-    color: "#FFFFFF",
+    color: "white",
     paddingVertical: 10,
     paddingHorizontal: 15,
     fontSize: 16,
@@ -177,12 +247,18 @@ const styles = StyleSheet.create({
   },
   amount: {
     borderWidth: 1,
-    borderColor: "#242F9B",
+    borderColor: colors.primary,
     height: 40,
-    width: 200,
+    width: 300,
     marginTop: "2%",
     borderRadius: 10,
     color: "black",
     padding: 10,
+  },
+  error: {
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 5,
+    color: "red",
   },
 });

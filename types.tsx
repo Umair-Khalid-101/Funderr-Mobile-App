@@ -26,18 +26,18 @@ export type RootStackParamList = {
   LandingPage: undefined;
   Drawer: undefined;
   Tech: undefined;
-  Medical: undefined;
-  Art: undefined;
-  Music: undefined;
-  Illustration: undefined;
   Profile: undefined;
   MyCampaigns: undefined;
+  MyFavCampaigns: undefined;
   HowItWorks: undefined;
   ContactUs: undefined;
   NewCampaign: undefined;
   CardDetails: undefined;
   Donate: undefined;
   UserContext: undefined;
+  EditCampaign: undefined;
+  EditProfile: undefined;
+  Notifications: undefined;
 };
 
 export type RootStackScreenProps<Screen extends keyof RootStackParamList> =

@@ -3,19 +3,15 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
-  Dimensions,
   Image,
+  Alert,
 } from "react-native";
 import React from "react";
-import { Feather } from "@expo/vector-icons";
-import { Ionicons } from "@expo/vector-icons";
 import { AntDesign } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 
 import { useContext } from "react";
 import UserContext from "./context/userContext";
-
-const { height, width } = Dimensions.get("window");
 
 export default function Drawer() {
   const navigation = useNavigation();
@@ -54,7 +50,7 @@ export default function Drawer() {
         <Text style={styles.text2}>{userdata.email}</Text>
         <TouchableOpacity
           style={styles.button}
-          onPress={() => navigation.navigate("MyCampaigns")}
+          onPress={() => navigation.navigate("EditProfile")}
         >
           <Text style={styles.buttontext}>Edit Profile</Text>
         </TouchableOpacity>
@@ -69,9 +65,10 @@ const styles = StyleSheet.create({
     marginTop: 40,
   },
   image: {
-    resizeMode: "stretch",
+    resizeMode: "contain",
     width: 200,
     height: 200,
+    borderRadius: 100,
   },
   text: {
     color: "#242F9B",

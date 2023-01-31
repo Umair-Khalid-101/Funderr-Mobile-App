@@ -1,10 +1,3 @@
-/**
- * If you are not familiar with React Navigation, refer to the "Fundamentals" guide:
- * https://reactnavigation.org/docs/getting-started
- *
- */
-import { FontAwesome } from "@expo/vector-icons";
-import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import {
   NavigationContainer,
   DefaultTheme,
@@ -15,17 +8,10 @@ import * as React from "react";
 import { ColorSchemeName, Pressable } from "react-native";
 import MainPage from "../components/MainPage";
 import SignIn from "../components/SignIn";
-import Colors from "../constants/Colors";
-import useColorScheme from "../hooks/useColorScheme";
 import ModalScreen from "../screens/ModalScreen";
 import NotFoundScreen from "../screens/NotFoundScreen";
 import TabOneScreen from "../screens/TabOneScreen";
-import TabTwoScreen from "../screens/TabTwoScreen";
-import {
-  RootStackParamList,
-  RootTabParamList,
-  RootTabScreenProps,
-} from "../types";
+import { RootStackParamList } from "../types";
 import LinkingConfiguration from "./LinkingConfiguration";
 import SignUp from "../components/SignUp";
 import { UserProvider } from "../components/context/userContext";
@@ -34,10 +20,14 @@ import Drawer from "../components/Drawer";
 import CategoryCampaigns from "../components/category/Tech";
 import Profile from "../components/Profile";
 import MyCampaigns from "../components/UserData/MyCampaigns";
+import MyFavCampaigns from "../components/UserData/MyFavCampaigns";
 import HowItWorks from "../components/UserData/HowItWorks";
 import ContactUs from "../components/DrawerComponents/ContactUs";
 import NewCampaign from "../components/NewCampaign";
+import EditCampaign from "../components/EditCampaign";
 import CardDetails from "../components/UserData/CardDetails";
+import EditProfile from "../components/UserData/EditProfile";
+import Notifications from "../components/Notifications";
 
 export default function Navigation({
   colorScheme,
@@ -45,22 +35,18 @@ export default function Navigation({
   colorScheme: ColorSchemeName;
 }) {
   return (
-    <UserProvider>
-      <NavigationContainer
-        linking={LinkingConfiguration}
-        theme={colorScheme === "light" ? DefaultTheme : DarkTheme}
-        // theme={colorScheme === "light" ? DarkTheme : DefaultTheme}
-      >
+    <NavigationContainer
+      linking={LinkingConfiguration}
+      theme={colorScheme === "light" ? DefaultTheme : DarkTheme}
+      // theme={colorScheme === "light" ? DarkTheme : DefaultTheme}
+    >
+      <UserProvider>
         <RootNavigator />
-      </NavigationContainer>
-    </UserProvider>
+      </UserProvider>
+    </NavigationContainer>
   );
 }
 
-/**
- * A root stack navigator is often used for displaying modals on top of all other content.
- * https://reactnavigation.org/docs/modal
- */
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 function RootNavigator() {
@@ -76,7 +62,6 @@ function RootNavigator() {
         component={NotFoundScreen}
         options={{ title: "Oops!" }}
       />
-      {/* <Stack.Screen name="MainPage" component={MainPage} options={{ headerShown: false }}  /> */}
       <Stack.Screen
         name="SignIn"
         component={SignIn}
@@ -108,8 +93,23 @@ function RootNavigator() {
         options={{ headerShown: false }}
       />
       <Stack.Screen
+        name="EditProfile"
+        component={EditProfile}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="Notifications"
+        component={Notifications}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
         name="MyCampaigns"
         component={MyCampaigns}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="MyFavCampaigns"
+        component={MyFavCampaigns}
         options={{ headerShown: false }}
       />
       <Stack.Screen
@@ -128,6 +128,11 @@ function RootNavigator() {
         options={{ headerShown: false }}
       />
       <Stack.Screen
+        name="EditCampaign"
+        component={EditCampaign}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
         name="CardDetails"
         component={CardDetails}
         options={{ headerShown: false }}
@@ -142,65 +147,4 @@ function RootNavigator() {
       </Stack.Group>
     </Stack.Navigator>
   );
-}
-
-/**
- * A bottom tab navigator displays tab buttons on the bottom of the display to switch screens.
- * https://reactnavigation.org/docs/bottom-tab-navigator
- */
-// const BottomTab = createBottomTabNavigator<RootTabParamList>();
-
-// function BottomTabNavigator() {
-//   const colorScheme = useColorScheme();
-
-//   return (
-//     <BottomTab.Navigator
-//       initialRouteName="TabOne"
-//       screenOptions={{
-//         tabBarActiveTintColor: Colors[colorScheme].tint,
-//       }}>
-//       <BottomTab.Screen
-//         name="TabOne"
-//         component={TabOneScreen}
-//         options={({ navigation }: RootTabScreenProps<'TabOne'>) => ({
-//           title: 'Tab One',
-//           tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
-//           headerShown:false,
-//           headerRight: () => (
-//             <Pressable
-//               onPress={() => navigation.navigate('Modal')}
-//               style={({ pressed }) => ({
-//                 opacity: pressed ? 0.5 : 1,
-//               })}>
-//               <FontAwesome
-//                 name="info-circle"
-//                 size={25}
-//                 color={Colors[colorScheme].text}
-//                 style={{ marginRight: 15 }}
-//               />
-//             </Pressable>
-//           ),
-//         })}
-//       />
-//       <BottomTab.Screen
-//         name="TabTwo"
-//         component={TabTwoScreen}
-//         options={{
-//           title: 'Tab Two',
-//           tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
-//           headerShown: false
-//         }}
-//       />
-//     </BottomTab.Navigator>
-//   );
-// }
-
-/**
- * You can explore the built-in icon families and icons on the web at https://icons.expo.fyi/
- */
-function TabBarIcon(props: {
-  name: React.ComponentProps<typeof FontAwesome>["name"];
-  color: string;
-}) {
-  return <FontAwesome size={30} style={{ marginBottom: -3 }} {...props} />;
 }

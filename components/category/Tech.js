@@ -13,6 +13,7 @@ import Loader from "../Loader";
 import { BaseUrl } from "../constants";
 import UserContext from "../context/userContext";
 import Card from "../UserData/Card";
+import { colors } from "../constants";
 
 export default function CategoryCampaigns({ route, navigation }) {
   const [isLoading, setIsLoading] = useState(true);
@@ -32,7 +33,7 @@ export default function CategoryCampaigns({ route, navigation }) {
   }, []);
 
   if (isLoading) {
-    return <Loader />;
+    return <Loader title={`Loading ${category} Campaigns`} />;
   }
 
   if (categoryCampaigns.length === 0) {
@@ -41,14 +42,14 @@ export default function CategoryCampaigns({ route, navigation }) {
         <Text
           style={{
             fontSize: 20,
-            color: "#242F9B",
+            color: colors.primary,
           }}
         >
           No Campaigns of Category: {category}
         </Text>
         <TouchableOpacity
           style={{
-            backgroundColor: "#242F9B",
+            backgroundColor: colors.primary,
             padding: 16,
             marginTop: 10,
             borderRadius: 10,
@@ -84,7 +85,7 @@ export default function CategoryCampaigns({ route, navigation }) {
             <AntDesign
               name="arrowleft"
               size={28}
-              color="#242F9B"
+              color={colors.primary}
               onPress={() => navigation.navigate("LandingPage")}
             />
           </View>
@@ -99,7 +100,7 @@ export default function CategoryCampaigns({ route, navigation }) {
               color: "#242F9B",
             }}
           >
-            No of {category} Campaigns: {categoryCampaigns.length}
+            No of {category} Campaigns: ({categoryCampaigns.length})
           </Text>
           {categoryCampaigns.map((campaign) => (
             <View key={Math.random()}>
@@ -114,6 +115,7 @@ export default function CategoryCampaigns({ route, navigation }) {
                 startdate={campaign.startdate}
                 campaign={campaign}
                 permission={campaign.permission}
+                type="CategoryCampaigns"
               />
             </View>
           ))}

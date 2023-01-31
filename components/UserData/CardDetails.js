@@ -1,14 +1,10 @@
-import {
-  View,
-  Text,
-  StyleSheet,
-  Image,
-  ScrollView,
-  TouchableOpacity,
-} from "react-native";
+import { View, Text, StyleSheet, Image, ScrollView } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import React from "react";
 import { AntDesign } from "@expo/vector-icons";
+
+import ProgressBar from "../ProgressBar";
+import DaysLeft from "../DaysLeft";
 
 export default function CardDetails({ route }) {
   const { campaign } = route.params;
@@ -40,6 +36,7 @@ export default function CardDetails({ route }) {
       >
         <Image source={{ uri: campaign.picture }} style={styles.image} />
       </View>
+      <ProgressBar progress={30} raised={0.2} target={campaign.campaignGoal} />
       <ScrollView
         style={{
           height: 500,
@@ -136,18 +133,8 @@ export default function CardDetails({ route }) {
             <Text style={styles.text}>End Date:</Text>
             <Text style={styles.text2}>{campaign.enddate.split("T")[0]}</Text>
           </View>
-
-          <TouchableOpacity
-            style={styles.signupbuttoncontainer}
-            onPress={() =>
-              navigation.navigate("Donate", {
-                campaign,
-              })
-            }
-          >
-            <Text style={styles.signupbutton}>Donate</Text>
-          </TouchableOpacity>
         </View>
+        <DaysLeft deadline={campaign.enddate} campaign={campaign} />
       </ScrollView>
       <View style={{ height: 100 }}></View>
     </View>
@@ -155,7 +142,7 @@ export default function CardDetails({ route }) {
 }
 const styles = StyleSheet.create({
   image: {
-    resizeMode: "stretch",
+    resizeMode: "contain",
     width: 300,
     height: 200,
     borderRadius: 20,
@@ -180,19 +167,5 @@ const styles = StyleSheet.create({
     fontSize: 15,
     marginTop: 10,
     marginLeft: 5,
-  },
-  signupbuttoncontainer: {
-    backgroundColor: "#242F9B",
-    height: 40,
-    borderRadius: 50,
-    width: "70%",
-    justifyContent: "center",
-    alignItems: "center",
-
-    marginTop: "5%",
-    marginBottom: "5%",
-  },
-  signupbutton: {
-    color: "white",
   },
 });
