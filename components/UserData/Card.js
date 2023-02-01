@@ -55,7 +55,7 @@ export default function Card({
 
   return (
     <TouchableOpacity
-      onPress={() => navigation.navigate("CardDetails", { campaign })}
+      onPress={() => navigation.navigate("RaisedDonations", { campaign })}
     >
       <View
         style={{

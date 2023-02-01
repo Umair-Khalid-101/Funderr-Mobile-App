@@ -92,7 +92,7 @@ const Notifications = () => {
 
   const [notifications, setNotifications] = useState([
     {
-      id: "1",
+      "._id": "1",
       notification: "You do not have any Notifications",
       status: "unread",
     },

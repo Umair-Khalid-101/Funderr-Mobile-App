@@ -1,15 +1,43 @@
 import { View, Text, StyleSheet, Image, ScrollView } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { AntDesign } from "@expo/vector-icons";
 
 import ProgressBar from "../ProgressBar";
 import DaysLeft from "../DaysLeft";
 
-export default function CardDetails({ route }) {
-  const { campaign } = route.params;
+export default function CardDetails({ campaign, campaignDonations }) {
   // console.log("Campaign:(Details)", campaign);
+  // console.log("Campaign:(Details)", campaignDonations);
   const navigation = useNavigation();
+  const [raised, setRaised] = useState();
+
+  useEffect(() => {
+    calculateRaisedAmount();
+  }, []);
+
+  const calculateRaisedAmount = () => {
+    if (campaignDonations) {
+      const sum = campaignDonations.reduce((acc, obj) => {
+        return acc + parseFloat(obj.amount);
+      }, 0);
+      // console.log("Raised Amount: ", sum);
+      setRaised(sum);
+    }
+  };
+
+  const calculatePercentage = (part, whole) => {
+    if (whole === 0) {
+      return 0;
+    } else if (part > whole) {
+      return 100;
+    } else {
+      return (part / whole) * 100;
+    }
+  };
+  let percentage = calculatePercentage(raised, campaign.campaignGoal);
+  // console.log(`Percentage: ${percentage}%`);
+
   return (
     <View
       style={{
@@ -36,7 +64,11 @@ export default function CardDetails({ route }) {
       >
         <Image source={{ uri: campaign.picture }} style={styles.image} />
       </View>
-      <ProgressBar progress={30} raised={0.2} target={campaign.campaignGoal} />
+      <ProgressBar
+        progress={percentage}
+        raised={raised?.toFixed(2)}
+        target={campaign.campaignGoal}
+      />
       <ScrollView
         style={{
           height: 500,

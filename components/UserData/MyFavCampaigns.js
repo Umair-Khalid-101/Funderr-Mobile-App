@@ -42,7 +42,7 @@ export default function MyFavCampaigns() {
     })
       .then((res) => res.json())
       .then((data) => {
-        // console.log(data);
+        console.log(data);
       })
       .then(() => {
         Alert.alert("REMOVED", `${title} Removed from Favorites`);

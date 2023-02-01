@@ -28,6 +28,7 @@ import EditCampaign from "../components/EditCampaign";
 import CardDetails from "../components/UserData/CardDetails";
 import EditProfile from "../components/UserData/EditProfile";
 import Notifications from "../components/Notifications";
+import RaisedDonations from "../components/RaisedDonations";
 
 export default function Navigation({
   colorScheme,
@@ -135,6 +136,11 @@ function RootNavigator() {
       <Stack.Screen
         name="CardDetails"
         component={CardDetails}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="RaisedDonations"
+        component={RaisedDonations}
         options={{ headerShown: false }}
       />
       <Stack.Screen

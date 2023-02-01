@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useContext } from "react";
 import { StyleSheet, TouchableOpacity, TextInput, Alert } from "react-native";
 import { Text, View } from "../components/Themed";
 import { useWalletConnect } from "@walletconnect/react-native-dapp";
@@ -9,6 +9,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import BouncyCheckbox from "react-native-bouncy-checkbox";
 
 import { colors } from "../components/constants";
+import UserContext from "../components/context/userContext";
 
 const shortenAddress = (address) => {
   return `${address.slice(0, 6)}...${address.slice(
@@ -21,6 +22,7 @@ export default function TabOneScreen({ route, navigation }) {
   const navigate = useNavigation();
   const { campaign } = route.params;
   const [checkboxState, setCheckboxState] = React.useState(false);
+  const { addDonation } = useContext(UserContext);
 
   // console.log("Campaign:(DonateForm)", campaign);
 
@@ -87,8 +89,9 @@ export default function TabOneScreen({ route, navigation }) {
           amount: `${data.amount * 1000000000000000000}`,
           campaignId: campaign._id,
         };
-        console.log("Donation:", donation);
-        // navigation.navigate("LandingPage");
+        // console.log("Donation:", donation);
+        await addDonation(donation);
+        navigation.navigate("LandingPage");
       } catch (e) {
         console.error(e);
       }
