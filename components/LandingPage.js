@@ -2,18 +2,103 @@ import {
   View,
   Text,
   StyleSheet,
-  TouchableOpacity,
   ScrollView,
+  TouchableOpacity,
 } from "react-native";
-import React from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { Feather } from "@expo/vector-icons";
 import { Ionicons } from "@expo/vector-icons";
+import { MaterialIcons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
+
 import Card from "./UserData/Card";
+import Loader from "./Loader";
+import { BaseUrl } from "./constants/index";
+import UserContext from "./context/userContext";
+import HorizontalScrollView from "./HorizontalScrollView";
+import { colors } from "./constants/index";
+
 export default function LandingPage() {
+  const { verifiedCampaigns, setVerifiedCampaigns, token } =
+    useContext(UserContext);
+  // console.log("Token:", token);
   const navigation = useNavigation();
+  const [isLoading, setIsLoading] = useState(true);
+  useEffect(() => {
+    fetch(`${BaseUrl}/verifiedposts`)
+      .then((res) => res.json())
+      .then((data) => {
+        // console.log(data.verified);
+        setVerifiedCampaigns(data.verified);
+        setIsLoading(false);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  }, []);
+
+  // BUTTONS
+  const buttons = [
+    {
+      label: "Technology",
+      onPress: () => {
+        navigation.navigate("Tech", {
+          category: "Technical",
+        });
+      },
+    },
+    {
+      label: "Medical",
+      onPress: () => {
+        navigation.navigate("Tech", {
+          category: "Medical",
+        });
+      },
+    },
+    {
+      label: "Art",
+      onPress: () => {
+        navigation.navigate("Tech", {
+          category: "Art",
+        });
+      },
+    },
+    {
+      label: "Illustration",
+      onPress: () => {
+        navigation.navigate("Tech", {
+          category: "Illustration",
+        });
+      },
+    },
+    {
+      label: "Music",
+      onPress: () => {
+        navigation.navigate("Tech", {
+          category: "Music",
+        });
+      },
+    },
+    {
+      label: "Social",
+      onPress: () => {
+        navigation.navigate("Tech", {
+          category: "Social",
+        });
+      },
+    },
+  ];
+
+  if (isLoading) {
+    return <Loader title="Loading Featured Campaigns" />;
+  }
+
   return (
-    <View>
+    <View
+      style={{
+        flex: 1,
+      }}
+    >
       <View style={styles.Navbar}>
         <Feather
           name="menu"
@@ -42,8 +127,46 @@ export default function LandingPage() {
           size={28}
           color="white"
           style={{ alignSelf: "flex-end", marginRight: "5%", bottom: 30 }}
+          onPress={() => navigation.navigate("Notifications")}
         />
       </View>
+
+      <View
+        style={{
+          display: "flex",
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "flex-end",
+        }}
+      >
+        <Text
+          style={{
+            color: colors.primary,
+            fontSize: 16,
+            marginRight: 10,
+            marginTop: 10,
+          }}
+        >
+          Create New Campaign
+        </Text>
+        <TouchableOpacity
+          style={{
+            backgroundColor: colors.primary,
+            width: 56,
+            height: 56,
+            borderRadius: 28,
+            justifyContent: "center",
+            alignItems: "center",
+            position: "relative",
+            marginRight: 10,
+            marginTop: 10,
+          }}
+          onPress={() => navigation.navigate("NewCampaign")}
+        >
+          <MaterialIcons name="add" size={24} color="#fff" />
+        </TouchableOpacity>
+      </View>
+
       <View
         style={{
           width: "100%",
@@ -52,135 +175,55 @@ export default function LandingPage() {
       >
         <Text
           style={{
-            marginTop: 15,
-            color: "#242F9B",
+            color: colors.primary,
             fontWeight: "bold",
             fontSize: 20,
+            marginBottom: 10,
           }}
         >
           Categories
         </Text>
-        <View
-          style={{
-            display: "flex",
-            flexDirection: "row",
-            width: 400,
-          }}
-        >
-          <ScrollView
-            horizontal={true}
-            showsHorizontalScrollIndicator={false}
-            style={{ height: 70, }}
-          >
-            <TouchableOpacity
-              style={styles.categorybuttons}
-              onPress={() => navigation.navigate("Tech")}
-            >
-              <Text
-                style={{ color: "white", fontSize: 10 }}
-                onPress={() => navigation.navigate("Tech")}
-              >
-                Tech
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.categorybuttons2}
-              onPress={() => navigation.navigate("Medical")}
-            >
-              <Text
-                style={{ color: "white", fontSize: 10 }}
-                onPress={() => navigation.navigate("Medical")}
-              >
-                Medical
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.categorybuttons2}
-              onPress={() => navigation.navigate("Art")}
-            >
-              <Text
-                style={{ color: "white", fontSize: 10 }}
-                onPress={() => navigation.navigate("Art")}
-              >
-                Art
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.categorybuttons2}
-              onPress={() => navigation.navigate("Music")}
-            >
-              <Text
-                style={{ color: "white", fontSize: 10 }}
-                onPress={() => navigation.navigate("Music")}
-              >
-                Music
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.categorybuttons2}
-              onPress={() => navigation.navigate("Illustration")}
-            >
-              <Text
-                style={{ color: "white", fontSize: 10 }}
-                onPress={() => navigation.navigate("Illustration")}
-              >
-                Illustration
-              </Text>
-            </TouchableOpacity>
-            <View style={{width:30}}></View>
-          </ScrollView>
-
-        </View>
+        <HorizontalScrollView buttons={buttons} />
       </View>
       <ScrollView style={{ height: 515 }}>
         <View style={{ marginLeft: 15 }}>
-          <Text style={{ color: "#242F9B", fontWeight: "bold", fontSize: 20 }}>
-            All Campaigns
-          </Text>
-          <View style={{ marginTop: 10 }}>
-            <Card />
-          </View>
-          <View style={{ marginTop: 10 }}>
-            <Card />
-          </View>
-          <View style={{ marginTop: 10 }}>
-            <Card />
-          </View>
-          <View style={{ marginTop: 10 }}>
-            <Card />
-          </View>
-        </View>
-        <View style={{ height: 30 }}></View>
-      </ScrollView>
-
-      <View
-        style={{
-          height: 100,
-          width: "100%",
-          backgroundColor: "#242F9B",
-          borderTopRightRadius: 50,
-          borderTopLeftRadius: 50,
-        }}
-      >
-        <TouchableOpacity
-          style={styles.newcampaign}
-          onPress={() => navigation.navigate("NewCampaign")}
-        >
           <Text
-            style={{ color: "#242F9B", fontSize: 30 }}
-            onPress={() => navigation.navigate("NewCampaign")}
+            style={{
+              color: colors.primary,
+              fontWeight: "bold",
+              fontSize: 20,
+              marginBottom: 5,
+              marginTop: 10,
+            }}
           >
-            +
+            Verified Campaigns: ({verifiedCampaigns.length})
           </Text>
-        </TouchableOpacity>
-      </View>
+          {verifiedCampaigns.map((campaign) => (
+            <View key={Math.random()}>
+              <Card
+                title={campaign.title}
+                img={campaign.picture}
+                target={campaign.campaignGoal}
+                description={campaign.description}
+                username={campaign.posterName}
+                userpic={campaign.posterPic}
+                category={campaign.category}
+                startdate={campaign.startdate}
+                type="Verified Campaign"
+                campaign={campaign}
+                permission={campaign.permission}
+              />
+            </View>
+          ))}
+        </View>
+      </ScrollView>
     </View>
   );
 }
 const styles = StyleSheet.create({
   Navbar: {
-    backgroundColor: "#242F9B",
-    height: 150,
+    backgroundColor: colors.primary,
+    height: 130,
     width: "100%",
     borderBottomLeftRadius: 30,
     borderBottomRightRadius: 30,
@@ -189,7 +232,7 @@ const styles = StyleSheet.create({
   },
   newcampaign: {
     backgroundColor: "white",
-    height: 50,
+    height: 100,
     borderRadius: 50,
     width: 50,
     justifyContent: "center",
@@ -197,9 +240,10 @@ const styles = StyleSheet.create({
     marginTop: 10,
     marginRight: 20,
     alignSelf: "center",
+    position: "absolute",
   },
   categorybuttons: {
-    backgroundColor: "#242F9B",
+    backgroundColor: colors.primary,
     height: 40,
     borderRadius: 50,
     width: 80,
@@ -208,7 +252,7 @@ const styles = StyleSheet.create({
     marginTop: 15,
   },
   categorybuttons2: {
-    backgroundColor: "#242F9B",
+    backgroundColor: colors.primary,
     height: 40,
     borderRadius: 50,
     width: 80,

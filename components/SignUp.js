@@ -7,19 +7,26 @@ import {
   TouchableOpacity,
   ScrollView,
   Image,
+  Alert,
 } from "react-native";
-import React from "react";
+import React, { useContext } from "react";
 import { AntDesign } from "@expo/vector-icons";
 import { useState } from "react";
 import { useNavigation } from "@react-navigation/native";
-const { height, width } = Dimensions.get("window");
 import { useForm, Controller } from "react-hook-form";
 import * as ImagePicker from "expo-image-picker";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
-import * as FileSystem from "expo-file-system";
+
+import UserContext from "./context/userContext";
+import { colors } from "./constants";
+const { height, width } = Dimensions.get("window");
+import Loader from "./Loader";
 
 export default function SignUp() {
+  const { registerUser } = useContext(UserContext);
+  const [isLoading, setIsLoading] = useState(false);
+
   const placeHolder =
     "http://res.cloudinary.com/dfmhxmauj/image/upload/v1670337910/axqfk5lkxf09qsbhpspr.jpg";
 
@@ -44,7 +51,6 @@ export default function SignUp() {
 
   const navigation = useNavigation();
   const [image, setImage] = useState(null);
-  const [picture, setPicture] = useState(null);
   const {
     handleSubmit,
     control,
@@ -54,61 +60,33 @@ export default function SignUp() {
     resolver: yupResolver(signUpValidationSchema),
   });
   const onSubmit = async (data) => {
-    console.log(data);
-    // const fData = new FormData();
-    const ext = image?.uri.split(".").pop();
-    const filename = `${data.name}.${ext}`;
-    const file = {
-      uri: image,
-      name: filename,
-      type: `image/${ext}`,
-    };
-    await handleUpload(file);
-    // data.role = "user";
-    // data.picture = picture;
-    // // console.log("Data: ", data);
-    // // fData.append("name", data.name);
-    // // fData.append("email", data.email);
-    // // fData.append("password", data.password);
-    // // fData.append("role", "user");
-    // // fData.append("picture", picture);
-    // // console.log(fData);
-    // fetch("http://192.168.1.135:3001/funderr/register", {
-    //   body: JSON.stringify(data),
-    //   headers: {
-    //     "Content-Type": "application/json",
-    //     //   // 'Content-Type': 'application/x-www-form-urlencoded',
-    //   },
-    //   method: "POST",
-    // })
-    //   .then((res) => res.json())
-    //   .then((data) => {
-    //     console.log(data);
-    //   })
-    //   .catch((err) => {
-    //     console.log(err);
-    //   });
-    // setTimeout(() => {
-    //   navigation.navigate("SignIn");
-    // }, 1000);
-  };
-
-  const handleUpload = async (image) => {
-    // const data = new FormData();
-    // data.append("file", image);
-    // data.append("upload_preset", "funderrApp");
-    // data.append("cloud_name", "dfmhxmauj");
-
-    await fetch("https://api.cloudinary.com/v1_1/dfmhxmauj/image/upload", {
-      method: "post",
-      body: data,
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        console.log("Picture: ", data.url);
-        setPicture(data.url);
-      })
-      .catch((err) => console.log(err));
+    if (image) {
+      const fData = new FormData();
+      const ext = image?.uri.split(".").pop();
+      const filename = `${data.name}.${ext}`;
+      fData.append("name", data.name);
+      fData.append("email", data.email);
+      fData.append("password", data.password);
+      fData.append("role", "user");
+      fData.append("file", {
+        uri: image.uri, // the file URI
+        name: filename, // the file name
+        type: `image/${ext}`, // the file type
+      });
+      setIsLoading(true);
+      await registerUser(fData);
+      setIsLoading(false);
+    } else {
+      const fData = new FormData();
+      fData.append("name", data.name);
+      fData.append("email", data.email);
+      fData.append("password", data.password);
+      fData.append("role", "user");
+      fData.append("picture", placeHolder);
+      setIsLoading(true);
+      await registerUser(fData);
+      setIsLoading(false);
+    }
   };
 
   const pickImage = async () => {
@@ -135,157 +113,161 @@ export default function SignUp() {
   }
 
   return (
-    <ScrollView>
-      <View style={styles.container}>
-        <AntDesign
-          style={styles.backicon}
-          name="arrowleft"
-          size={28}
-          color="#242F9B"
-          onPress={() => navigation.navigate("MainPage")}
-        />
-        <Text
-          style={{
-            color: "#242F9B",
-            fontSize: 40,
-            fontWeight: "bold",
-            marginLeft: "10%",
-            marginTop: 10,
-          }}
-        >
-          Funderr
-        </Text>
-        <Text
-          style={{
-            color: "#242F9B",
-            fontSize: 20,
-            fontWeight: "bold",
-            marginLeft: "10%",
-          }}
-        >
-          Sign Up to Funderr
-        </Text>
-        <Text
-          style={{
-            color: "#242F9B",
-            fontSize: 18,
-            marginTop: "2%",
-            marginLeft: "10%",
-          }}
-        >
-          Name
-        </Text>
-        <Controller
-          control={control}
-          render={({ field: { onChange, value } }) => (
-            <TextInput
-              style={styles.email}
-              onChangeText={(value) => onChange(value)}
-              value={value}
+    <>
+      {!isLoading && (
+        <ScrollView>
+          <View style={styles.container}>
+            <AntDesign
+              style={styles.backicon}
+              name="arrowleft"
+              size={28}
+              color={colors.primary}
+              onPress={() => navigation.navigate("MainPage")}
             />
-          )}
-          name="name"
-        />
-        {errors.name && (
-          <Text style={styles.errors}>{errors.name.message}</Text>
-        )}
-        <Text
-          style={{
-            color: "#242F9B",
-            fontSize: 18,
-            marginTop: "2%",
-            marginLeft: "10%",
-          }}
-        >
-          Email
-        </Text>
-        <Controller
-          control={control}
-          render={({ field: { onChange, value } }) => (
-            <TextInput
-              style={styles.email}
-              onChangeText={(value) => onChange(value)}
-              value={value}
+            <Text
+              style={{
+                color: colors.primary,
+                fontSize: 40,
+                fontWeight: "bold",
+                marginLeft: "10%",
+                marginTop: 10,
+              }}
+            >
+              Funderr
+            </Text>
+            <Text
+              style={{
+                color: colors.primary,
+                fontSize: 20,
+                fontWeight: "bold",
+                marginLeft: "10%",
+              }}
+            >
+              Sign Up to Funderr
+            </Text>
+            <Text
+              style={{
+                color: colors.primary,
+                fontSize: 18,
+                marginTop: "2%",
+                marginLeft: "10%",
+              }}
+            >
+              Name
+            </Text>
+            <Controller
+              control={control}
+              render={({ field: { onChange, value } }) => (
+                <TextInput
+                  style={styles.email}
+                  onChangeText={(value) => onChange(value)}
+                  value={value}
+                />
+              )}
+              name="name"
             />
-          )}
-          name="email"
-        />
-        {errors.email && (
-          <Text style={styles.errors}>{errors.email.message}</Text>
-        )}
-        <Text
-          style={{
-            color: "#242F9B",
-            fontSize: 18,
-            marginTop: "2%",
-            marginLeft: "10%",
-          }}
-        >
-          Password
-        </Text>
+            {errors.name && (
+              <Text style={styles.errors}>{errors.name.message}</Text>
+            )}
+            <Text
+              style={{
+                color: colors.primary,
+                fontSize: 18,
+                marginTop: "2%",
+                marginLeft: "10%",
+              }}
+            >
+              Email
+            </Text>
+            <Controller
+              control={control}
+              render={({ field: { onChange, value } }) => (
+                <TextInput
+                  style={styles.email}
+                  onChangeText={(value) => onChange(value)}
+                  value={value}
+                />
+              )}
+              name="email"
+            />
+            {errors.email && (
+              <Text style={styles.errors}>{errors.email.message}</Text>
+            )}
+            <Text
+              style={{
+                color: colors.primary,
+                fontSize: 18,
+                marginTop: "2%",
+                marginLeft: "10%",
+              }}
+            >
+              Password
+            </Text>
 
-        <Controller
-          control={control}
-          render={({ field: { onChange, value } }) => (
-            <TextInput
-              style={styles.email}
-              onChangeText={(value) => onChange(value)}
-              value={value}
-              secureTextEntry
+            <Controller
+              control={control}
+              render={({ field: { onChange, value } }) => (
+                <TextInput
+                  style={styles.email}
+                  onChangeText={(value) => onChange(value)}
+                  value={value}
+                  secureTextEntry
+                />
+              )}
+              name="password"
             />
-          )}
-          name="password"
-        />
-        {errors.password && (
-          <Text style={styles.errors}>{errors.password.message}</Text>
-        )}
-        <Text
-          style={{
-            color: "#242F9B",
-            fontSize: 18,
-            marginTop: "2%",
-            marginLeft: "10%",
-          }}
-        >
-          Confirm Password
-        </Text>
-        <Controller
-          control={control}
-          render={({ field: { onChange, value } }) => (
-            <TextInput
-              style={styles.email}
-              onChangeText={(value) => onChange(value)}
-              value={value}
-              secureTextEntry
+            {errors.password && (
+              <Text style={styles.errors}>{errors.password.message}</Text>
+            )}
+            <Text
+              style={{
+                color: colors.primary,
+                fontSize: 18,
+                marginTop: "2%",
+                marginLeft: "10%",
+              }}
+            >
+              Confirm Password
+            </Text>
+            <Controller
+              control={control}
+              render={({ field: { onChange, value } }) => (
+                <TextInput
+                  style={styles.email}
+                  onChangeText={(value) => onChange(value)}
+                  value={value}
+                  secureTextEntry
+                />
+              )}
+              name="confirmpassword"
             />
-          )}
-          name="confirmpassword"
-        />
-        {errors.confirmpassword && (
-          <Text style={styles.errors}>{errors.confirmpassword.message}</Text>
-        )}
-        <Image
-          source={source}
+            {errors.confirmpassword && (
+              <Text style={styles.errors}>
+                {errors.confirmpassword.message}
+              </Text>
+            )}
+            <Image
+              source={source}
+              style={{
+                width: 100,
+                height: 100,
+                borderRadius: 50,
+                marginLeft: "10%",
+                marginTop: "2%",
+              }}
+            />
+            <TouchableOpacity style={styles.imagebutton} onPress={pickImage}>
+              <Text style={{ color: colors.primary }}>Upload Image</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.signupbuttoncontainer}
+              onPress={handleSubmit(onSubmit)}
+            >
+              <Text style={styles.signupbutton}>Sign Up</Text>
+            </TouchableOpacity>
+            {/* <Text
           style={{
-            width: 100,
-            height: 100,
-            borderRadius: 50,
-            marginLeft: "10%",
-            marginTop: "2%",
-          }}
-        />
-        <TouchableOpacity style={styles.imagebutton} onPress={pickImage}>
-          <Text style={{ color: "#242F9B" }}>Upload Image</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.signupbuttoncontainer}
-          onPress={handleSubmit(onSubmit)}
-        >
-          <Text style={styles.signupbutton}>Sign Up</Text>
-        </TouchableOpacity>
-        {/* <Text
-          style={{
-            color: "#242F9B",
+            color: colors.primary,
             fontWeight: "bold",
             fontSize: 15,
             margin: "10%",
@@ -301,11 +283,11 @@ export default function SignUp() {
             width: "10%",
           }}
         >
-          <AntDesign name="google" size={35} color="#242F9B" />
+          <AntDesign name="google" size={35} color=colors.primary />
         </TouchableOpacity>
         <Text
           style={{
-            color: "#242F9B",
+            color: colors.primary,
             fontWeight: "bold",
             fontSize: 15,
             marginLeft: "10%",
@@ -322,10 +304,13 @@ export default function SignUp() {
             width: "10%",
           }}
         >
-          <AntDesign name="facebook-square" size={35} color="#242F9B" />
+          <AntDesign name="facebook-square" size={35} color=colors.primary />
         </TouchableOpacity> */}
-      </View>
-    </ScrollView>
+          </View>
+        </ScrollView>
+      )}
+      {isLoading && <Loader title="Signing Up..." />}
+    </>
   );
 }
 const styles = StyleSheet.create({
@@ -341,7 +326,7 @@ const styles = StyleSheet.create({
   email: {
     marginLeft: "10%",
     borderWidth: 1,
-    borderColor: "#242F9B",
+    borderColor: colors.primary,
     height: 40,
     width: "75%",
     marginTop: "2%",
@@ -349,7 +334,7 @@ const styles = StyleSheet.create({
     padding: 10,
   },
   signupbuttoncontainer: {
-    backgroundColor: "#242F9B",
+    backgroundColor: colors.primary,
     height: "7%",
     borderRadius: 50,
     width: "70%",
@@ -370,7 +355,7 @@ const styles = StyleSheet.create({
     marginLeft: 40,
     justifyContent: "center",
     alignItems: "center",
-    borderColor: "#242F9B",
+    borderColor: colors.primary,
   },
   errors: {
     fontSize: 10,
